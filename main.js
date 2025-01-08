@@ -4,13 +4,12 @@ function getComputerChoice(){
     return choices[randomChoice];
 }
 
-function getHumanChoice(){
-    const humanChoice = prompt('Enter your choice: rock, paper, or scissors');
-    return humanChoice;
-}
-
 let humanScore = 0;
 let computerScore = 0;
+const resultsDiv = document.getElementById('results');
+
+// Add winning score constant
+const WINNING_SCORE = 5;
 
 function playRound(humanChoice, computerChoice){
     let result = '';
@@ -47,45 +46,48 @@ function playRound(humanChoice, computerChoice){
         }
     }
 
-    console.log(result);
-    console.log(`Score - You: ${humanScore} Computer: ${computerScore}`);
+    // Check for winner after updating scores
+    let gameOver = '';
+    if (humanScore === WINNING_SCORE) {
+        gameOver = 'Game Over - You are the champion! 🎉';
+        disableButtons();
+    } else if (computerScore === WINNING_SCORE) {
+        gameOver = 'Game Over - Computer wins! Try again!';
+        disableButtons();
+    }
+
+    // Update display with game over message if applicable
+    resultsDiv.innerHTML = `
+        <p>${result}</p>
+        <p>Score - You: ${humanScore} Computer: ${computerScore}</p>
+        ${gameOver ? `<p class="game-over">${gameOver}</p>
+        <button onclick="resetGame()">Play Again</button>` : ''}
+    `;
     return result;
 }
 
-function getRoundCount() {
-    const rounds = prompt('How many rounds would you like to play?');
-    const roundCount = parseInt(rounds);
-    
-    if (isNaN(roundCount) || roundCount < 1) {
-        console.log('Please enter a valid number greater than 0');
-        return getRoundCount();
-    }
-    return roundCount;
+// Add function to disable buttons
+function disableButtons() {
+    document.querySelectorAll('.choices button').forEach(button => {
+        button.disabled = true;
+    });
 }
 
-function playGame(){
+// Add function to reset the game
+function resetGame() {
     humanScore = 0;
     computerScore = 0;
-    
-    const totalRounds = getRoundCount();
-    console.log(`Playing ${totalRounds} rounds...`);
-    
-    for(let i = 0; i < totalRounds; i++){
-        console.log(`\nRound ${i + 1}:`);
-        const humanChoice = getHumanChoice();
-        const computerChoice = getComputerChoice();
-        playRound(humanChoice, computerChoice);
-    }
-
-    console.log('\n=== Game Over ===');
-    if(humanScore > computerScore){
-        console.log('Congratulations! You won the game!');
-    } else if(computerScore > humanScore){
-        console.log('Game Over! Computer wins!');
-    } else {
-        console.log("It's a tie game!");
-    }
-    console.log(`Final Score - You: ${humanScore} Computer: ${computerScore}`);
+    resultsDiv.innerHTML = '';
+    document.querySelectorAll('.choices button').forEach(button => {
+        button.disabled = false;
+    });
 }
 
-playGame();
+// Add event listeners to buttons
+document.querySelectorAll('.choices button').forEach(button => {
+    button.addEventListener('click', () => {
+        const humanChoice = button.id; // 'rock', 'paper', or 'scissors'
+        const computerChoice = getComputerChoice();
+        playRound(humanChoice, computerChoice);
+    });
+});
